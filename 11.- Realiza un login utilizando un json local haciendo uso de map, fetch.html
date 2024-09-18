@@ -1,0 +1,123 @@
+<!--
+José Eduardo Hirales Núñez
+Universidad Autónoma de Baja California Sur
+Programación Avanzada en Internet IDS TV
+-->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style type="text/css">
+        body {
+            background-color: #F7F4EA;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #main {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            border: 1px solid #000000;
+        }
+
+        fieldset {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #000000;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #c4c1c6;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background-color: #0d5eff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid #000000;
+        }
+
+        label {
+            font-size: 14px;
+            color: #181818;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <form @submit.prevent="login" v-if="!isValid">
+            <fieldset>
+                <label>Email:</label>
+                <input type="email" v-model="email">
+            </fieldset>
+            <br>
+
+            <fieldset>
+                <label>Password:</label>
+                <input type="password" v-model="password">
+            </fieldset>
+            <button type="submit">Login</button>
+        </form>
+
+        <h1 v-if="isValid">Welcome</h1>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue
+        createApp({
+            data() {
+                const email = ref('');
+                const password = ref('');
+                const isValid = ref(false);
+                return {
+                    email,
+                    password,
+                    isValid
+                }
+            },
+            methods: {
+                login() {
+                    console.log(this.email),
+                        console.log(this.password)
+
+                    fetch('users.json')
+                        .then(response => response.json())
+                        .then(users => {
+                            users.forEach(user => {
+                                if (user.email === this.email && user.password === this.password) {
+                                    this.isValid = ref(true);
+                                    console.log(this.isValid)
+                                }
+                            });
+                        });
+                }
+            }
+        }).mount('#main')
+    </script>
+</body>
+</html>
