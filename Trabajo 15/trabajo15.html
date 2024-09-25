@@ -1,0 +1,268 @@
+<!--
+José Eduardo Hirales Núñez
+Universidad Autónoma de Baja California Sur
+Programación Avanzada en Internet IDS TV
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <style type="text/css">
+        body {
+            background-color: #F7F4EA;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #main {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            border: 1px solid #000000;
+        }
+
+        fieldset {
+            text-align: center;
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        input {
+            text-align: center;
+            width: 80%; 
+            padding: 10px; 
+            margin: 10px 0;
+            border: 1px solid #000000;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #c4c1c6;
+        }
+
+        button {
+            width: 50%;
+            padding: 12px;
+            margin-top: 15px;
+            background-color: #0d5eff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid #000000;
+        }
+
+        label {
+            font-size: 14px;
+            color: #181818;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #000000;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .edit-mode input {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="main">
+        <form @submit.prevent="login" v-if="!is_log">
+            <fieldset>
+                <hr>
+                <label>Email</label>
+                <hr>
+                <input type="email" v-model="userEmail" placeholder="write here" required>
+            </fieldset>
+
+            <fieldset>
+                <hr>
+                <label>Password</label>
+                <hr>
+                <input type="password" v-model="userPassword" placeholder="write here" required>
+            </fieldset>
+
+            <button type="submit">Access</button>
+        </form>
+
+        <div v-if="is_log && !isAdding">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Company Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(currentUser, index) in users" :key="index">
+                        <td v-if="!currentUser.isModifying">{{ currentUser.name }}</td>
+                        <td v-if="currentUser.isModifying">
+                            <input type="text" v-model="currentUser.name" placeholder="Name">
+                        </td>
+
+                        <td v-if="!currentUser.isModifying">{{ currentUser.username }}</td>
+                        <td v-if="currentUser.isModifying">
+                            <input type="text" v-model="currentUser.username" placeholder="Username">
+                        </td>
+
+                        <td v-if="!currentUser.isModifying">{{ currentUser.email }}</td>
+                        <td v-if="currentUser.isModifying">
+                            <input type="email" v-model="currentUser.email" placeholder="Email">
+                        </td>
+
+                        <td v-if="!currentUser.isModifying">{{ currentUser.phone }}</td>
+                        <td v-if="currentUser.isModifying">
+                            <input type="text" v-model="currentUser.phone" placeholder="Phone">
+                        </td>
+
+                        <td v-if="!currentUser.isModifying">{{ currentUser.company.name }}</td>
+                        <td v-if="currentUser.isModifying">
+                            <input type="text" v-model="currentUser.company.name" placeholder="Company Name">
+                        </td>
+
+                        <td>
+                            <button v-if="!currentUser.isModifying" @click="editUser(index)">Edit</button>
+                            <button v-if="currentUser.isModifying" @click="saveUser(index)">Save</button>
+                            <button v-if="currentUser.isModifying" @click="cancelEdit(index)">Cancel</button>
+                            <button v-if="!currentUser.isModifying" @click="deleteUser(index)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button @click="toggleAddUser">Add User</button>
+        </div>
+
+        <div v-if="isAdding">
+            <h3>Add New User</h3>
+            <input type="text" v-model="newUser.name" placeholder="Name">
+            <input type="text" v-model="newUser.username" placeholder="Username">
+            <input type="email" v-model="newUser.email" placeholder="Email">
+            <input type="text" v-model="newUser.phone" placeholder="Phone">
+            <input type="text" v-model="newUser.company.name" placeholder="Company Name">
+
+            <button @click="saveNewUser">Save</button>
+            <button @click="toggleAddUser">Cancel</button>
+        </div>
+
+        <hr>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const userEmail = ref('');
+                const userPassword = ref('');
+                const is_log = ref(false);
+                const users = ref([]);
+                const isAdding = ref(false);
+                const newUser = ref({
+                    name: '',
+                    username: '',
+                    email: '',
+                    phone: '',
+                    company: { name: '' }
+                });
+
+                return {
+                    userEmail,
+                    userPassword,
+                    is_log,
+                    users,
+                    isAdding,
+                    newUser
+                };
+            },
+            methods: {
+                login() {
+                    fetch("users.json")
+                    .then(response => response.json())
+                    .then(response => {
+                        const userFound = response.find(e => e.email === this.userEmail && e.password === this.userPassword);
+                        if (userFound) {
+                            this.is_log = true;
+                            localStorage.setItem("user_data", JSON.stringify(userFound));
+                            this.users = response; 
+                        } else {
+                            alert("Invalid login");
+                        }
+                    });
+                },
+                editUser(index) {
+                    this.users[index].isModifying = true;
+                },
+                saveUser(index) {
+                    this.users[index].isModifying = false;
+                    localStorage.setItem("users", JSON.stringify(this.users));
+                },
+                cancelEdit(index) {
+                    this.users[index].isModifying = false;
+                    this.fetchUsers();
+                },
+                deleteUser(index) {
+                    this.users.splice(index, 1);
+                    localStorage.setItem("users", JSON.stringify(this.users));
+                },
+                toggleAddUser() {
+                    this.isAdding = !this.isAdding;
+                },
+                saveNewUser() {
+                    this.users.push({...this.newUser});
+                    localStorage.setItem("users", JSON.stringify(this.users));
+                    this.toggleAddUser();
+                    this.newUser = { name: '', username: '', email: '', phone: '', company: { name: '' } };
+                },
+                fetchUsers() {
+                    const savedUsers = JSON.parse(localStorage.getItem("users"));
+                    if (savedUsers) {
+                        this.users = savedUsers;
+                    } else {
+                        fetch("users.json")
+                        .then(response => response.json())
+                        .then(response => {
+                            this.users = response.map(user => ({ ...user, isModifying: false }));
+                            localStorage.setItem("users", JSON.stringify(this.users));
+                        });
+                    }
+                }
+            },
+            mounted() {
+                this.fetchUsers(); 
+                let user_data = localStorage.getItem("user_data");
+                if (user_data != null) {
+                    user_data = JSON.parse(user_data);
+                    this.is_log = true;
+                }
+            }
+        }).mount('#main');
+    </script>
+</body>
+</html>
