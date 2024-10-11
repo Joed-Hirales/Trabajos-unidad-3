@@ -1,0 +1,134 @@
+<!--
+José Eduardo Hirales Núñez
+Universidad Autónoma de Baja California Sur
+Programación Avanzada en Internet IDS TV
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style type="text/css">
+      
+        body {
+            margin: 0;
+            background-color: #1c1c1e;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #main {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1100px;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #2c2c2e;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: opacity 0.3s ease;
+        }
+
+        img:hover {
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5em;
+            margin: 15px 0;
+            color: #0298cb;
+            transition: color 0.3s ease;
+        }
+ 
+        h2:hover {
+            color: #31e0fb;
+            cursor: pointer;
+        }
+
+        p {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 1em;
+            line-height: 1.5em;
+            color: #dcdde1;
+            text-align: justify;
+        }
+
+        h5 {
+            font-family: 'Open Sans', sans-serif;
+            color: #f5f6fa;
+            margin: 5px 0;
+            
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div class="card" v-for="movie in movies" :key="movie.id">
+            <img :src="'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + movie.poster_path" alt="movie poster" @click="viewMovie(movie)">
+            <h2 @click="viewMovie(movie)">{{ movie.title }}</h2>
+            <h5>Release Date: {{ movie.release_date }}</h5>
+            <p>{{ movie.overview }}</p>
+            <h5>Original Language: {{ movie.original_language }}</h5>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    movies: [],
+                }
+            },
+            methods: {
+                getMovies() {
+                    fetch('https://api.themoviedb.org/3/discover/movie?api_key=a6a488b515b4ce93c09d8af3c641eb43')
+                        .then(response => response.json())
+                        .then(data => {
+                            this.movies = data.results;
+                        })
+                        .catch(error => {
+                            console.log("Error: " + error);
+                        });
+                },
+                viewMovie(movie) {
+                    const movieId = movie.id;
+                    window.location.href = `movie.html?id=${movieId}`;
+                }
+            },
+            mounted() {
+                this.getMovies();
+            }
+        }).mount('#main');
+    </script>
+</body>
+</html>

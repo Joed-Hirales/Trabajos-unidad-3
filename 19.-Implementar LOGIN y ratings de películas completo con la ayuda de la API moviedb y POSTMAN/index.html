@@ -1,0 +1,118 @@
+<!--
+José Eduardo Hirales Núñez
+Universidad Autónoma de Baja California Sur
+Programación Avanzada en Internet IDS TV
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style type="text/css">
+        body {
+            height: 100%;
+            margin: auto;
+            font-family: Bahnschrift Light;
+        }
+
+        #main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1c1c1e;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px #444b6e8a;
+            text-align: center;
+        }
+
+        fieldset {
+            border: none;
+            margin: 10px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: auto;
+            margin: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: block;
+            font-family: Bahnschrift Light;
+        }
+
+        button {
+            margin: 10px auto;
+            padding: 10px;
+            background-color: #5f675e;
+            color: rgb(255, 255, 255);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            width: auto;
+            font-family: Bahnschrift Light;
+        }
+
+        button:hover {
+            background-color: #565656;
+        }
+    </Style>
+</head>
+
+<body>
+    <div id="main">
+        <form @submit.prevent="login" v-if="!isValid">
+            <label for="">Log in to your account</label>
+            <fieldset>
+                <label>Email:</label>
+                <input type="email" v-model="email">
+            </fieldset>
+            <br>
+            <fieldset>
+                <label>Password:</label>
+                <input type="password" v-model="password">
+            </fieldset>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+    <script>
+        const { createApp, ref } = Vue;
+        createApp({
+            data() {
+                return {
+                    email: 'admin@hotmail.com',
+                    password: 'admin',
+                    isValid: ref(false)
+                }
+            },
+            methods: {
+                login() {
+                    console.log(this.email)
+                    console.log(this.password)
+                    if (this.email === 'admin@hotmail.com' && this.password === 'admin') {
+                        this.isValid = ref(true);
+                        window.location.href = 'movies.html'
+                    } else {
+                        this.isValid = ref(false);
+                        alert('We could not validate your information. Want to try again?');
+                    }
+                }
+            }
+        }).mount('#main')
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!--
+José Eduardo Hirales Núñez
+Universidad Autónoma de Baja California Sur
+Programación Avanzada en Internet IDS TV
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style type="text/css">
+        #main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            background-color: #1c1c1e;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #2c2c2e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px #444b6e8a;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            width: 90%;
+            max-width: 600px;
+            margin: 10px auto;
+        }
+
+        .card img {
+            width: 120px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+
+        .card-content {
+            flex: 1;
+        }
+
+        .card-content h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .stars {
+            display: flex;
+            cursor: pointer;
+        }
+
+        .star {
+            font-size: 2rem;
+            color: rgb(128, 128, 128);
+        }
+
+        .star.filled {
+            color: rgba(255, 242, 0, 0.936);
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #6b6b6b;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            margin: 0 5px;
+        }
+
+        button:hover {
+            background-color: #bbbbbb;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        h1{
+            color: #0298cb;
+            font-family: Bahnschrift Light;
+            text-align: justify;
+        } 
+        h4 {
+            font-family: Bahnschrift Light;
+            text-align: justify;
+        }
+
+        p {
+            font-family: Bahnschrift Light;
+            text-align: justify;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main" class="details">
+
+        <div class="card" v-if="movie.id">
+            <img :src="'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + movie.poster_path" alt="movie poster">
+            <div class="card-content">
+                <h1>{{ movie.title }}</h1>
+                <h4>Release Date: </br> {{ movie.release_date }}</h4>
+                <p>{{ movie.overview }}</p>
+                <h4>Original Language: {{ movie.original_language }}</h4>
+                <h4>Popularity: {{ movie.popularity }}</h4>
+                <h4>Vote Average: {{ movie.vote_average }}</h4>
+                <h4>Vote Count: {{ movie.vote_count }}</h4>
+
+                <h4>Rate this movie:</h4>
+                <div class="stars">
+                    <span v-for="star in 5" :key="star" @click="setRating(star)"
+                        :class="['star', { 'filled': star <= rating }]">
+                        ★
+                    </span>
+                </div>
+
+                <div class="button-container">
+                    <button @click="saveRating()">Save</button>
+                    <button @click="deleteRating()">Delete</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    movieId: null,
+                    movie: {},
+                    rating: 0
+                }
+            },
+            methods: {
+                getDetails(movieId) {
+                    console.log(`Fetching details for movie ID: ${movieId}`);
+                    const url = `https://api.themoviedb.org/3/movie/${movieId}?api_key=a6a488b515b4ce93c09d8af3c641eb43`;
+                    console.log('API URL:', url);
+
+                    fetch(url)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error: ' + response.status + ' ' + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log(data);
+                            this.movie = data;
+                            this.loadRating();
+                        })
+                        .catch(error => {
+                            console.log("Error: " + error);
+                        });
+                },
+                getMovieIdFromUrl() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get('id');
+                },
+                saveRating() {
+                    localStorage.setItem(`rating_${this.movieId}`, this.rating);
+                },
+                loadRating() {
+                    const storedRating = localStorage.getItem(`rating_${this.movieId}`);
+                    if (storedRating !== null) {
+                        this.rating = parseFloat(storedRating);
+                        console.log('Rating loaded:', this.rating);
+                    }
+                },
+                deleteRating() {
+                    if (this.movieId) {
+                        localStorage.removeItem(`rating_${this.movieId}`);
+                        this.rating = 0;
+                        console.log('Rating deleted');
+                    }
+                },
+                setRating(star) {
+                    this.rating = star; 
+                }
+            }
+            ,
+            mounted() {
+                this.movieId = this.getMovieIdFromUrl();
+                console.log('Movie ID from URL:', this.movieId);
+                if (this.movieId) {
+                    this.getDetails(this.movieId);
+                } else {
+                    console.log('No movie ID provided');
+                }
+            }
+        }).mount('#main')
+    </script>
+</body>
+</html>
